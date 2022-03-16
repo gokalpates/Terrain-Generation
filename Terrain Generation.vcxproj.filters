@@ -57,5 +57,6 @@
   <ItemGroup>
     <None Include="shader\main.vert" />
     <None Include="shader\main.frag" />
+    <None Include="README.md" />
   </ItemGroup>
 </Project>

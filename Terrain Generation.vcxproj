@@ -163,6 +163,7 @@
     <ClInclude Include="include\ProcuderalTerrain.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="README.md" />
     <None Include="shader\main.frag" />
     <None Include="shader\main.vert" />
   </ItemGroup>
