@@ -24,17 +24,20 @@ public:
 	void draw(Shader& shader);
 
 	unsigned int getVertexCount();
+	unsigned int getNormalCount();
 	unsigned int getIndexCount();
 private:
 	void generateTerrain(TerrainInfo& info);
 	void setupBuffers();
 
-	unsigned int VAO, VBO, EBO;
+	unsigned int VAO, positionsVBO, normalsVBO, EBO;
 
 	unsigned int vertexSize;
 	unsigned int indexSize;
+	unsigned int normalSize;
 
 	std::vector<glm::vec3> vertices;
 	std::vector<unsigned int> indices;
+	std::vector<glm::vec3> normals;
 };
 

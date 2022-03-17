@@ -50,16 +50,17 @@ int main()
 
 	glm::mat4 model(1.f);
 	glm::mat4 view(1.f);
-	glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)(screenWidth) / (float)(screenHeight), 0.1f, 1000.f);
+	glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)(screenWidth) / (float)(screenHeight), 0.1f, 10000.f);
 
 	Shader shader("shader/main.vert", "shader/main.frag");
 
 	TerrainInfo info;
 	info.triYTriScale = 80.f;
+	info.mapSize = 4096;
 	ProcuderalTerrain* terrain = new ProcuderalTerrain(info);
 
-	//Application flow variables.
-	bool isRenderMode = true;
+	std::cout << "vertices count: " << terrain->getVertexCount() << std::endl;
+	std::cout << "normals count: " << terrain->getNormalCount() << std::endl;
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -86,62 +87,38 @@ int main()
 		ImGui::NewFrame();
 
 		{
+			static bool cullfaceOption = false;
 			ImGui::Begin("OpenGL Renderer");
 			ImGui::Text("FPS: %d\n", FPS);
-			ImGui::Text("Press E for edit mode.");
-			ImGui::Text("Press R for render mode.");
+			ImGui::Text("Press E or R to enable/disable face culling.");
 			ImGui::Text("Press Left Control + X to exit.");
-			ImGui::End();
 
-			//GUI variables.
-			static int mapSize = 512;
-			static int seed = 160322;
-			static float frequency = 0.01;
-			static float magnitude = 10.f;
+			ImGui::Checkbox("Cull Face", &cullfaceOption);
 
-			ImGui::Begin("Terrain Generation Settings");
-			ImGui::DragInt("Seed", &seed, 1.f, 0.0, 512);
-			ImGui::DragInt("Map Size", &mapSize, 1.f, 64, 512);
-			ImGui::SliderFloat("Frequency", &frequency, 0.001f, 0.01f);
-			ImGui::SliderFloat("Y Magnitude", &magnitude, 0.01, 95.0);
-
-			if (info.mapSize != mapSize || info.seed != seed || info.frequency != frequency || info.triYTriScale != magnitude)
+			if (glfwGetKey(window,GLFW_KEY_E))
 			{
-				delete terrain;
-
-				info.mapSize = mapSize;
-				info.seed = seed;
-				info.frequency = frequency;
-				info.triYTriScale = magnitude;
-
-				terrain = new ProcuderalTerrain(info);
+				cullfaceOption = true;
+			}
+			if (glfwGetKey(window, GLFW_KEY_R))
+			{
+				cullfaceOption = false;
 			}
 
+			if (cullfaceOption)
+			{
+				glEnable(GL_CULL_FACE);
+			}
+			else
+			{
+				glDisable(GL_CULL_FACE);
+			}
 			ImGui::End();
 		}
 
+		camera.update();
+		view = camera.getViewMatrix();
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		if (glfwGetKey(window,GLFW_KEY_E))
-		{
-			isRenderMode = false;
-
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		}
-		else if (glfwGetKey(window,GLFW_KEY_R))
-		{
-			isRenderMode = true;
-
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-			camera.setFirstTouch(true);
-		}
-
-		if (isRenderMode == true)
-		{
-			camera.update();
-			view = camera.getViewMatrix();
-		}
 
 		shader.use();
 		shader.setAllMat4(model, view, projection);
